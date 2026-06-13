@@ -4,8 +4,12 @@ const menuButton = document.querySelector(".menu-button");
 const menuLinks = [...document.querySelectorAll(".menu a")];
 const languageButtons = [...document.querySelectorAll(".language-toggle")];
 const siteNameNodes = [...document.querySelectorAll(".site-name")];
+const refreshIndicator = document.createElement("div");
 
 let language = localStorage.getItem("portfolio-language") || "zh";
+let pullStartY = 0;
+let pullDistance = 0;
+let isPulling = false;
 
 const labels = {
   zh: {
@@ -17,6 +21,12 @@ const labels = {
     language: "\u4e2d / EN",
     previous: "\u4e0a\u4e00\u5f35",
     next: "\u4e0b\u4e00\u5f35",
+    role: "\u651d\u5f71\u5e2b   /   \u5c0e\u6f14",
+    based: "\u5e38\u99d0\u5730  \u4e0a\u6d77  \u897f\u5b89",
+    selectedWorks: "\u7cbe\u9078\u4f5c\u54c1",
+    viewSeries: "\u9032\u5165\u7cfb\u5217",
+    imageCount: "\u5f35\u7167\u7247",
+    refresh: "\u9b06\u958b\u5237\u65b0",
   },
   en: {
     home: "HOME",
@@ -27,6 +37,12 @@ const labels = {
     language: "EN / \u4e2d",
     previous: "Previous",
     next: "Next",
+    role: "Photographer   /   Director",
+    based: "Based in  Shanghai  Xi'an",
+    selectedWorks: "Selected Works",
+    viewSeries: "Enter Series",
+    imageCount: "images",
+    refresh: "Release to refresh",
   },
 };
 
@@ -121,8 +137,8 @@ const artworks = [
   },
   {
     id: "TaiwanHongKong",
-    value: { zh: "\u4e2d\u570b\u81fa\u7063/\u9999\u6e2f\u62cd\u651d", en: "Taiwan / Hong Kong" },
-    name: "Taiwan / Hong Kong",
+    value: { zh: "\u4e2d\u570b\u81fa\u7063/\u9999\u6e2f\u62cd\u651d", en: "Taiwan / Hong Kong, China" },
+    name: "Taiwan / Hong Kong, China",
     cover: taiwanHongKongImages[0],
     images: taiwanHongKongImages,
   },
@@ -149,7 +165,7 @@ const films = [
 ];
 
 const contact = [
-  ["Email", "1292374458@qq.com", "mailto:1292374458@qq.com"],
+  ["Email", "lizhuoyuan830@gmail.com", "mailto:lizhuoyuan830@gmail.com"],
   ["Instagram", "lizhuoyuan830", "https://www.instagram.com/lizhuoyuan830"],
 ];
 
@@ -170,7 +186,7 @@ const getRoute = () => {
   return { path, query };
 };
 
-const pageTitle = (key) => `<h1 class="page-title">${labels[language][key] || key}</h1>`;
+const pageTitle = (key) => `<h1 class="page-title">${labels[language][key] || key}<span>${language === "zh" ? labels.en[key] || key : ""}</span></h1>`;
 
 const artworkMeta = (item) => `
   <h2>${text(item.value)}</h2>
@@ -179,10 +195,16 @@ const artworkMeta = (item) => `
 
 const carousel = (images, index = 0) => {
   const safeIndex = Math.max(0, Math.min(Number(index) || 0, images.length - 1));
+  const pageImages = images.slice(safeIndex, safeIndex + 5);
+  if (pageImages.length < 5) pageImages.push(...images.slice(0, 5 - pageImages.length));
   return `
     <div class="carousel" data-index="${safeIndex}">
-      <div class="carousel-frame">
-        <img src="${images[safeIndex]}" alt="">
+      <div class="carousel-grid">
+        ${pageImages.map((src, imageIndex) => `
+          <figure class="carousel-tile carousel-tile-${imageIndex + 1}">
+            <img src="${src}" alt="">
+          </figure>
+        `).join("")}
       </div>
       <div class="carousel-controls">
         <button type="button" data-carousel="prev">${labels[language].previous}</button>
@@ -195,38 +217,54 @@ const carousel = (images, index = 0) => {
 
 const renderHome = () => `
   <section class="home">
-    <img src="${homeImage}" alt="home">
+    <div class="home-copy">
+      <div>
+        <h1 class="home-name">${language === "zh" ? "\u674e\u5353\u9060" : `<span class="nowrap">Chuo-y\u00fcan</span><br>Lee`}</h1>
+        ${language === "zh" ? `<div class="home-name-en">Chuo-y\u00fcan Lee</div>` : ""}
+      </div>
+      <div class="home-meta">
+        <div>${labels[language].role}</div>
+        <div>${labels[language].based}</div>
+      </div>
+    </div>
+    <figure class="home-frame">
+      <img src="${homeImage}" alt="home">
+    </figure>
   </section>
 `;
 
 const renderBiography = () => `
   <article class="max-page">
     ${pageTitle("biography")}
-    <img class="bio-photo" src="${bioImage}" alt="profile">
-    <section class="bio-section">
-      <h1 class="page-title">${nameMarkup()}</h1>
-      <ul>
-        <li>${language === "zh" ? "\u897f\u5317\u653f\u6cd5\u5927\u5b78  \u672c\u79d1" : "Northwest University of Political Science and Law  Bachelor"}</li>
-        <li>${language === "zh" ? "\u4e16\u65b0\u5927\u5b78  \u7814\u4fee" : "Shih Hsin University  Visiting Study"}</li>
-        <li>${language === "zh" ? "\u5e38\u99d0\u5730  \u4e0a\u6d77  \u897f\u5b89" : "Based in  Shanghai  Xi'an"}</li>
-      </ul>
-    </section>
+    <div class="bio-layout">
+      <img class="bio-photo" src="${bioImage}" alt="profile">
+      <section class="bio-section">
+        <h1 class="page-title">${nameMarkup()}</h1>
+        <div class="bio-role">${labels[language].role}</div>
+        <ul>
+          <li>${language === "zh" ? "\u897f\u5317\u653f\u6cd5\u5927\u5b78  \u672c\u79d1" : "Northwest University of Political Science and Law  Bachelor"}</li>
+          <li>${language === "zh" ? "\u4e16\u65b0\u5927\u5b78  \u7814\u4fee" : "Shih Hsin University  Visiting Study"}</li>
+          <li>${labels[language].based}</li>
+        </ul>
+      </section>
+    </div>
   </article>
 `;
 
 const renderArtworks = () => `
   <section class="page artworks">
     ${pageTitle("artworks")}
-    <div class="grid-list">
+    <div class="artwork-index">
       ${artworks
-        .map((item) => `
-          <article class="tile">
-            <a href="#/artwork-group/${item.id}">${image(item.cover, item.name)}</a>
+        .map((item, index) => `
+          <a class="artwork-card" href="#/artwork-group/${item.id}">
+            <div class="row-number">${String(index + 1).padStart(2, "0")}</div>
+            <div class="row-preview"><img src="${item.cover}" alt="${item.name}"></div>
             <div class="tile-caption">
-              <h2>${text(item.value)}</h2>
-              <div class="muted">${item.name}</div>
+              <h2 class="row-title">${text(item.value)}</h2>
+              <div class="row-en">${item.name}</div>
             </div>
-          </article>
+          </a>
         `)
         .join("")}
     </div>
@@ -237,7 +275,7 @@ const renderArtworkGroup = (id) => {
   const item = artworks.find((artwork) => artwork.id === id) || artworks[0];
   return `
     <section class="detail-wrap">
-      <h1 class="detail-head"><a href="#/artworks">${labels[language].artworks}</a></h1>
+      <h1 class="detail-head"><a href="#/artworks">${labels[language].artworks}</a><span>${labels[language].viewSeries}</span></h1>
       <div class="group-meta">${artworkMeta(item)}</div>
       <div class="thumb-strip">
         ${item.images.map((src, index) => `<a href="#/artwork/${item.id}?index=${index}"><img class="strip-image" src="${src}" alt=""></a>`).join("")}
@@ -250,7 +288,7 @@ const renderArtworkDetail = (id, query) => {
   const item = artworks.find((artwork) => artwork.id === id) || artworks[0];
   return `
     <section class="detail-wrap">
-      <h1 class="detail-head"><a href="#/artworks">${labels[language].artworks}</a></h1>
+      <h1 class="detail-head"><a href="#/artwork-group/${item.id}">${text(item.value)}</a><span>${item.name}</span></h1>
       <div class="detail-layout">
         <aside class="detail-meta">${artworkMeta(item)}</aside>
         <div class="detail-media">${carousel(item.images, query.index)}</div>
@@ -265,7 +303,7 @@ const renderFilms = () => `
     <div class="video-grid">
       ${films.map((item) => `
         <article class="video-card">
-          <div class="video-placeholder">${item.url}</div>
+          <video src="${item.url}" controls preload="metadata"></video>
           <h2><a href="${item.url}" target="_blank">${text(item.title)}</a></h2>
         </article>
       `).join("")}
@@ -299,7 +337,7 @@ const markLoadedImages = () => {
 
 const wireCarousel = () => {
   document.querySelectorAll(".carousel").forEach((carouselNode) => {
-    const frame = carouselNode.querySelector(".carousel-frame img");
+    const grid = carouselNode.querySelector(".carousel-grid");
     const buttons = carouselNode.querySelectorAll("[data-carousel]");
     const currentRoute = getRoute();
     const id = currentRoute.path.split("/").pop();
@@ -307,13 +345,22 @@ const wireCarousel = () => {
     if (!source) return;
 
     let index = Number(carouselNode.dataset.index) || 0;
+    const draw = () => {
+      const pageImages = source.images.slice(index, index + 5);
+      if (pageImages.length < 5) pageImages.push(...source.images.slice(0, 5 - pageImages.length));
+      grid.innerHTML = pageImages.map((src, imageIndex) => `
+        <figure class="carousel-tile carousel-tile-${imageIndex + 1}">
+          <img src="${src}" alt="">
+        </figure>
+      `).join("");
+      carouselNode.querySelector(".carousel-controls span").textContent = `${index + 1} / ${source.images.length}`;
+    };
     buttons.forEach((button) => {
       button.addEventListener("click", () => {
-        index += button.dataset.carousel === "next" ? 1 : -1;
+        index += button.dataset.carousel === "next" ? 5 : -5;
         if (index < 0) index = source.images.length - 1;
         if (index >= source.images.length) index = 0;
-        frame.src = source.images[index];
-        carouselNode.querySelector(".carousel-controls span").textContent = `${index + 1} / ${source.images.length}`;
+        draw();
       });
     });
   });
@@ -342,8 +389,41 @@ const syncLanguageUI = () => {
   });
 };
 
+const setupPullRefresh = () => {
+  refreshIndicator.className = "pull-refresh";
+  refreshIndicator.textContent = labels[language].refresh;
+  document.body.appendChild(refreshIndicator);
+
+  window.addEventListener("touchstart", (event) => {
+    if (window.scrollY !== 0 || event.touches.length !== 1) return;
+    pullStartY = event.touches[0].clientY;
+    pullDistance = 0;
+    isPulling = true;
+  }, { passive: true });
+
+  window.addEventListener("touchmove", (event) => {
+    if (!isPulling) return;
+    pullDistance = event.touches[0].clientY - pullStartY;
+    if (pullDistance <= 18) {
+      refreshIndicator.classList.remove("visible");
+      return;
+    }
+    refreshIndicator.classList.add("visible");
+    refreshIndicator.style.transform = `translateX(-50%) translateY(${Math.min(pullDistance - 18, 58)}px)`;
+  }, { passive: true });
+
+  window.addEventListener("touchend", () => {
+    if (!isPulling) return;
+    isPulling = false;
+    refreshIndicator.classList.remove("visible");
+    refreshIndicator.style.transform = "";
+    if (pullDistance > 96 && window.scrollY === 0) window.location.reload();
+  });
+};
+
 const render = () => {
   syncLanguageUI();
+  refreshIndicator.textContent = labels[language].refresh;
   const { path, query } = getRoute();
   const parts = path.split("/").filter(Boolean);
   const [section, id] = parts;
@@ -373,4 +453,5 @@ languageButtons.forEach((button) => {
   });
 });
 window.addEventListener("hashchange", render);
+setupPullRefresh();
 render();
