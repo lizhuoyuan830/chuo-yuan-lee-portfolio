@@ -195,17 +195,12 @@ const artworkMeta = (item) => `
 
 const carousel = (images, index = 0) => {
   const safeIndex = Math.max(0, Math.min(Number(index) || 0, images.length - 1));
-  const pageImages = images.slice(safeIndex, safeIndex + 5);
-  if (pageImages.length < 5) pageImages.push(...images.slice(0, 5 - pageImages.length));
+  const currentImage = images[safeIndex];
   return `
     <div class="carousel" data-index="${safeIndex}">
-      <div class="carousel-grid">
-        ${pageImages.map((src, imageIndex) => `
-          <figure class="carousel-tile carousel-tile-${imageIndex + 1}">
-            <img src="${src}" alt="">
-          </figure>
-        `).join("")}
-      </div>
+      <figure class="carousel-frame">
+        <img src="${currentImage}" alt="">
+      </figure>
       <div class="carousel-controls">
         <button type="button" data-carousel="prev">${labels[language].previous}</button>
         <span>${safeIndex + 1} / ${images.length}</span>
@@ -337,7 +332,7 @@ const markLoadedImages = () => {
 
 const wireCarousel = () => {
   document.querySelectorAll(".carousel").forEach((carouselNode) => {
-    const grid = carouselNode.querySelector(".carousel-grid");
+    const frame = carouselNode.querySelector(".carousel-frame");
     const buttons = carouselNode.querySelectorAll("[data-carousel]");
     const currentRoute = getRoute();
     const id = currentRoute.path.split("/").pop();
@@ -346,18 +341,13 @@ const wireCarousel = () => {
 
     let index = Number(carouselNode.dataset.index) || 0;
     const draw = () => {
-      const pageImages = source.images.slice(index, index + 5);
-      if (pageImages.length < 5) pageImages.push(...source.images.slice(0, 5 - pageImages.length));
-      grid.innerHTML = pageImages.map((src, imageIndex) => `
-        <figure class="carousel-tile carousel-tile-${imageIndex + 1}">
-          <img src="${src}" alt="">
-        </figure>
-      `).join("");
+      frame.innerHTML = `<img src="${source.images[index]}" alt="">`;
       carouselNode.querySelector(".carousel-controls span").textContent = `${index + 1} / ${source.images.length}`;
+      history.replaceState(null, "", `#/artwork/${source.id}?index=${index}`);
     };
     buttons.forEach((button) => {
       button.addEventListener("click", () => {
-        index += button.dataset.carousel === "next" ? 5 : -5;
+        index += button.dataset.carousel === "next" ? 1 : -1;
         if (index < 0) index = source.images.length - 1;
         if (index >= source.images.length) index = 0;
         draw();
