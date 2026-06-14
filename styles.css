@@ -227,7 +227,7 @@ p {
 }
 
 .page-title,
-detail-head {
+.detail-head {
   margin-bottom: clamp(54px, 10vh, 104px);
 }
 
