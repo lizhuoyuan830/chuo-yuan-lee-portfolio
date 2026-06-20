@@ -244,12 +244,14 @@ const renderBiography = () => `
       <img class="bio-photo" src="${bioImage}" alt="profile">
       <section class="bio-section">
         <h1 class="page-title">${nameMarkup()}</h1>
-        <div class="bio-role">${labels[language].role}</div>
-        <ul>
-          <li>${language === "zh" ? "\u897f\u5317\u653f\u6cd5\u5927\u5b78  \u672c\u79d1" : "Northwest University of Political Science and Law  Bachelor"}</li>
-          <li>${language === "zh" ? "\u4e16\u65b0\u5927\u5b78  \u7814\u4fee" : "Shih Hsin University  Visiting Study"}</li>
-          <li>${labels[language].based}</li>
-        </ul>
+        <div class="bio-details">
+          <div class="bio-role">${labels[language].role}</div>
+          <ul>
+            <li>${language === "zh" ? "\u897f\u5317\u653f\u6cd5\u5927\u5b78  \u672c\u79d1" : "Northwest University of Political Science and Law  Bachelor"}</li>
+            <li>${language === "zh" ? "\u4e16\u65b0\u5927\u5b78  \u7814\u4fee" : "Shih Hsin University  Visiting Study"}</li>
+            <li>${labels[language].based}</li>
+          </ul>
+        </div>
       </section>
     </div>
   </article>
