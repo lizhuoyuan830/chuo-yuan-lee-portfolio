@@ -207,7 +207,7 @@ const carousel = (images, index = 0) => {
   const currentImage = images[safeIndex];
   return `
     <div class="carousel" data-index="${safeIndex}">
-      <figure class="carousel-frame">
+      <figure class="carousel-frame carousel-shift-${safeIndex % 3}">
         <img src="${currentImage}" alt="">
       </figure>
       <div class="carousel-controls">
@@ -362,6 +362,7 @@ const wireCarousel = () => {
 
     let index = Number(carouselNode.dataset.index) || 0;
     const draw = () => {
+      frame.className = `carousel-frame carousel-shift-${index % 3}`;
       frame.innerHTML = `<img src="${source.images[index]}" alt="">`;
       carouselNode.querySelector(".carousel-controls span").textContent = `${index + 1} / ${source.images.length}`;
       history.replaceState(null, "", `#/artwork/${source.id}?index=${index}`);
