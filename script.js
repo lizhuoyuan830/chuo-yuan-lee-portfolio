@@ -27,6 +27,7 @@ const labels = {
     viewSeries: "\u9032\u5165\u7cfb\u5217",
     imageCount: "\u5f35\u7167\u7247",
     refresh: "\u9b06\u958b\u5237\u65b0",
+    back: "\u8fd4\u56de",
   },
   en: {
     home: "HOME",
@@ -43,6 +44,7 @@ const labels = {
     viewSeries: "Enter Series",
     imageCount: "images",
     refresh: "Release to refresh",
+    back: "Back",
   },
 };
 
@@ -251,9 +253,8 @@ const renderArtworks = () => `
     ${pageTitle("artworks")}
     <div class="artwork-index">
       ${artworks
-        .map((item, index) => `
+        .map((item) => `
           <a class="artwork-card" href="#/artwork-group/${item.id}">
-            <div class="row-number">${String(index + 1).padStart(2, "0")}</div>
             <div class="row-preview"><img src="${item.cover}" alt="${item.name}"></div>
             <div class="tile-caption">
               <h2 class="row-title">${text(item.value)}</h2>
@@ -270,6 +271,7 @@ const renderArtworkGroup = (id) => {
   const item = artworks.find((artwork) => artwork.id === id) || artworks[0];
   return `
     <section class="detail-wrap">
+      <a class="back-link" href="#/artworks">${labels[language].back}</a>
       <h1 class="detail-head"><a href="#/artworks">${labels[language].artworks}</a><span>${labels[language].viewSeries}</span></h1>
       <div class="group-meta">${artworkMeta(item)}</div>
       <div class="thumb-strip">
@@ -283,6 +285,7 @@ const renderArtworkDetail = (id, query) => {
   const item = artworks.find((artwork) => artwork.id === id) || artworks[0];
   return `
     <section class="detail-wrap">
+      <a class="back-link" href="#/artwork-group/${item.id}">${labels[language].back}</a>
       <h1 class="detail-head"><a href="#/artwork-group/${item.id}">${text(item.value)}</a><span>${item.name}</span></h1>
       <div class="detail-layout">
         <aside class="detail-meta">${artworkMeta(item)}</aside>
@@ -417,6 +420,7 @@ const render = () => {
   const { path, query } = getRoute();
   const parts = path.split("/").filter(Boolean);
   const [section, id] = parts;
+  document.body.classList.toggle("route-home", !section);
 
   if (!section) view.innerHTML = renderHome();
   else if (section === "biography") view.innerHTML = renderBiography();
