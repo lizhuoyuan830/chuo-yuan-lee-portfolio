@@ -195,6 +195,13 @@ const artworkMeta = (item) => `
   <div>${item.name}</div>
 `;
 
+const artworkTrail = (item) => `
+  <div class="work-trail">
+    <span>${labels[language].artworks}</span>
+    <strong>${text(item.value)}</strong>
+  </div>
+`;
+
 const carousel = (images, index = 0) => {
   const safeIndex = Math.max(0, Math.min(Number(index) || 0, images.length - 1));
   const currentImage = images[safeIndex];
@@ -231,7 +238,7 @@ const renderHome = () => `
 `;
 
 const renderBiography = () => `
-  <article class="max-page">
+  <article class="page biography-page">
     ${pageTitle("biography")}
     <div class="bio-layout">
       <img class="bio-photo" src="${bioImage}" alt="profile">
@@ -271,8 +278,10 @@ const renderArtworkGroup = (id) => {
   const item = artworks.find((artwork) => artwork.id === id) || artworks[0];
   return `
     <section class="detail-wrap">
-      <a class="back-link" href="#/artworks">${labels[language].back}</a>
-      <h1 class="detail-head"><a href="#/artworks">${labels[language].artworks}</a><span>${labels[language].viewSeries}</span></h1>
+      <div class="detail-topbar">
+        <a class="back-link" href="#/artworks">${labels[language].back}</a>
+        ${artworkTrail(item)}
+      </div>
       <div class="group-meta">${artworkMeta(item)}</div>
       <div class="thumb-strip">
         ${item.images.map((src, index) => `<a href="#/artwork/${item.id}?index=${index}"><img class="strip-image" src="${src}" alt=""></a>`).join("")}
@@ -285,8 +294,10 @@ const renderArtworkDetail = (id, query) => {
   const item = artworks.find((artwork) => artwork.id === id) || artworks[0];
   return `
     <section class="detail-wrap">
-      <a class="back-link" href="#/artwork-group/${item.id}">${labels[language].back}</a>
-      <h1 class="detail-head"><a href="#/artwork-group/${item.id}">${text(item.value)}</a><span>${item.name}</span></h1>
+      <div class="detail-topbar">
+        <a class="back-link" href="#/artwork-group/${item.id}">${labels[language].back}</a>
+        ${artworkTrail(item)}
+      </div>
       <div class="detail-layout">
         <aside class="detail-meta">${artworkMeta(item)}</aside>
         <div class="detail-media">${carousel(item.images, query.index)}</div>
@@ -310,13 +321,20 @@ const renderFilms = () => `
 `;
 
 const renderContact = () => `
-  <section class="max-page">
+  <section class="page contact-page">
     ${pageTitle("contact")}
     <ul class="contact-list">
       ${contact.map(([name, value, url]) => `
         <li>
-          <strong>${name}:</strong>
-          ${url ? `<a href="${url}" target="_blank">${value}</a>` : `<span>${value || ""}</span>`}
+          <strong>${name}</strong>
+          ${
+            url
+              ? `<a class="contact-link" href="${url}" ${url.startsWith("mailto:") ? "" : `target="_blank"`}>
+                  <span>${value}</span>
+                  <span class="contact-icon contact-icon-${name.toLowerCase()}" aria-hidden="true"></span>
+                </a>`
+              : `<span>${value || ""}</span>`
+          }
         </li>
       `).join("")}
     </ul>
