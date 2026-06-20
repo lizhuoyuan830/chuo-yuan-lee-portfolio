@@ -380,9 +380,24 @@ const wireCarousel = () => {
 
     let index = Number(carouselNode.dataset.index) || 0;
     const imageNode = frame.querySelector("img");
-    const syncOrientation = () => carouselNode.classList.toggle("is-portrait", imageNode.naturalHeight > imageNode.naturalWidth);
+    const footer = carouselNode.querySelector(".carousel-footer");
+    const syncFooter = () => {
+      const frameRect = frame.getBoundingClientRect();
+      const imageRect = imageNode.getBoundingClientRect();
+      if (!imageRect.width) return;
+      footer.style.width = `${imageRect.width}px`;
+      footer.style.marginLeft = `${Math.max(0, imageRect.left - frameRect.left)}px`;
+      footer.style.marginRight = "auto";
+    };
+    const syncOrientation = () => {
+      carouselNode.classList.toggle("is-portrait", imageNode.naturalHeight > imageNode.naturalWidth);
+      requestAnimationFrame(syncFooter);
+    };
     imageNode.addEventListener("load", syncOrientation);
     if (imageNode.complete) syncOrientation();
+    const imageResizeObserver = new ResizeObserver(syncFooter);
+    imageResizeObserver.observe(imageNode);
+    window.addEventListener("resize", syncFooter);
     const draw = () => {
       carouselNode.className = `carousel carousel-shift-${index % 3}`;
       frame.className = `carousel-frame carousel-shift-${index % 3}`;

@@ -592,25 +592,32 @@ p {
   line-height: 1.45;
 }
 
+.detail-media {
+  width: 100%;
+  min-width: 0;
+}
+
 .carousel {
   display: grid;
-  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  gap: 0.3rem;
 }
 
 .carousel-frame {
   position: relative;
   margin: 0;
   display: grid;
-  align-items: center;
+  align-items: end;
   min-height: min(64vh, 720px);
-  padding: clamp(10px, 1.8vw, 28px) clamp(0px, 3vw, 48px);
+  padding: clamp(10px, 1.8vw, 28px) 0 4px;
   background: transparent;
   border: 0;
 }
 
 .carousel-frame img {
   display: block;
-  max-width: min(88%, 1120px);
+  max-width: min(78%, 1040px);
   max-height: min(72vh, 790px);
   width: auto;
   height: auto;
@@ -672,12 +679,17 @@ p {
   justify-items: start;
 }
 
-.carousel-shift-1 {
-  justify-items: center;
+.carousel-frame.carousel-shift-1,
+.carousel-frame.carousel-shift-2 {
+  justify-items: start;
 }
 
-.carousel-shift-2 {
-  justify-items: end;
+.carousel:not(.is-portrait).carousel-shift-1 .carousel-frame img {
+  transform: translateX(2vw);
+}
+
+.carousel:not(.is-portrait).carousel-shift-2 .carousel-frame img {
+  transform: translateX(4vw);
 }
 
 .carousel.is-portrait .carousel-frame {
@@ -685,21 +697,28 @@ p {
 }
 
 .carousel-footer {
-  width: min(88%, 1120px);
+  width: 78%;
+  max-width: 1040px;
+  justify-self: start;
 }
 
 .carousel-shift-0 .carousel-footer {
   margin-right: auto;
 }
 
-.carousel-shift-1 .carousel-footer,
 .carousel.is-portrait .carousel-footer {
   margin-right: auto;
   margin-left: auto;
 }
 
-.carousel-shift-2 .carousel-footer {
-  margin-left: auto;
+.carousel:not(.is-portrait).carousel-shift-1 .carousel-footer {
+  margin-right: auto;
+  margin-left: 2vw;
+}
+
+.carousel:not(.is-portrait).carousel-shift-2 .carousel-footer {
+  margin-right: auto;
+  margin-left: 4vw;
 }
 
 .carousel-controls {
@@ -732,8 +751,8 @@ p {
 .carousel-thumbs {
   display: flex;
   gap: 8px;
-  margin-top: clamp(18px, 3vh, 30px);
-  padding: 8px 0 4px;
+  margin-top: 0;
+  padding: 2px 0 4px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scrollbar-width: thin;
