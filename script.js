@@ -206,7 +206,7 @@ const carousel = (images, index = 0) => {
   const safeIndex = Math.max(0, Math.min(Number(index) || 0, images.length - 1));
   const currentImage = images[safeIndex];
   return `
-    <div class="carousel" data-index="${safeIndex}">
+    <div class="carousel carousel-shift-${safeIndex % 3}" data-index="${safeIndex}">
       <figure class="carousel-frame carousel-shift-${safeIndex % 3}">
         <img src="${currentImage}" alt="">
         <button class="carousel-hotspot carousel-hotspot-prev" type="button" data-carousel="prev" aria-label="${labels[language].previous}">
@@ -216,17 +216,19 @@ const carousel = (images, index = 0) => {
           <span aria-hidden="true">&rarr;</span>
         </button>
       </figure>
-      <div class="carousel-controls">
-        <button type="button" data-carousel="prev">${labels[language].previous}</button>
-        <span>${safeIndex + 1} / ${images.length}</span>
-        <button type="button" data-carousel="next">${labels[language].next}</button>
-      </div>
-      <div class="carousel-thumbs" aria-label="${labels[language].artworks}">
-        ${images.map((src, imageIndex) => `
-          <button class="carousel-thumb${imageIndex === safeIndex ? " active" : ""}" type="button" data-carousel-index="${imageIndex}" aria-label="${imageIndex + 1}">
-            <img src="${src}" alt="">
-          </button>
-        `).join("")}
+      <div class="carousel-footer">
+        <div class="carousel-thumbs" aria-label="${labels[language].artworks}">
+          ${images.map((src, imageIndex) => `
+            <button class="carousel-thumb${imageIndex === safeIndex ? " active" : ""}" type="button" data-carousel-index="${imageIndex}" aria-label="${imageIndex + 1}">
+              <img src="${src}" alt="">
+            </button>
+          `).join("")}
+        </div>
+        <div class="carousel-controls">
+          <button type="button" data-carousel="prev">${labels[language].previous}</button>
+          <span>${safeIndex + 1} / ${images.length}</span>
+          <button type="button" data-carousel="next">${labels[language].next}</button>
+        </div>
       </div>
     </div>
   `;
@@ -377,9 +379,15 @@ const wireCarousel = () => {
     if (!source) return;
 
     let index = Number(carouselNode.dataset.index) || 0;
+    const imageNode = frame.querySelector("img");
+    const syncOrientation = () => carouselNode.classList.toggle("is-portrait", imageNode.naturalHeight > imageNode.naturalWidth);
+    imageNode.addEventListener("load", syncOrientation);
+    if (imageNode.complete) syncOrientation();
     const draw = () => {
+      carouselNode.className = `carousel carousel-shift-${index % 3}`;
       frame.className = `carousel-frame carousel-shift-${index % 3}`;
-      frame.querySelector("img").src = source.images[index];
+      imageNode.src = source.images[index];
+      if (imageNode.complete) syncOrientation();
       carouselNode.querySelector(".carousel-controls span").textContent = `${index + 1} / ${source.images.length}`;
       thumbButtons.forEach((thumb) => thumb.classList.toggle("active", Number(thumb.dataset.carouselIndex) === index));
       carouselNode.querySelector(`[data-carousel-index="${index}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
