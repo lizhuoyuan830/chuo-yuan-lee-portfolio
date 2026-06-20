@@ -209,11 +209,24 @@ const carousel = (images, index = 0) => {
     <div class="carousel" data-index="${safeIndex}">
       <figure class="carousel-frame carousel-shift-${safeIndex % 3}">
         <img src="${currentImage}" alt="">
+        <button class="carousel-hotspot carousel-hotspot-prev" type="button" data-carousel="prev" aria-label="${labels[language].previous}">
+          <span aria-hidden="true">&larr;</span>
+        </button>
+        <button class="carousel-hotspot carousel-hotspot-next" type="button" data-carousel="next" aria-label="${labels[language].next}">
+          <span aria-hidden="true">&rarr;</span>
+        </button>
       </figure>
       <div class="carousel-controls">
         <button type="button" data-carousel="prev">${labels[language].previous}</button>
         <span>${safeIndex + 1} / ${images.length}</span>
         <button type="button" data-carousel="next">${labels[language].next}</button>
+      </div>
+      <div class="carousel-thumbs" aria-label="${labels[language].artworks}">
+        ${images.map((src, imageIndex) => `
+          <button class="carousel-thumb${imageIndex === safeIndex ? " active" : ""}" type="button" data-carousel-index="${imageIndex}" aria-label="${imageIndex + 1}">
+            <img src="${src}" alt="">
+          </button>
+        `).join("")}
       </div>
     </div>
   `;
@@ -357,6 +370,7 @@ const wireCarousel = () => {
   document.querySelectorAll(".carousel").forEach((carouselNode) => {
     const frame = carouselNode.querySelector(".carousel-frame");
     const buttons = carouselNode.querySelectorAll("[data-carousel]");
+    const thumbButtons = carouselNode.querySelectorAll("[data-carousel-index]");
     const currentRoute = getRoute();
     const id = currentRoute.path.split("/").pop();
     const source = artworks.find((item) => item.id === id);
@@ -365,8 +379,10 @@ const wireCarousel = () => {
     let index = Number(carouselNode.dataset.index) || 0;
     const draw = () => {
       frame.className = `carousel-frame carousel-shift-${index % 3}`;
-      frame.innerHTML = `<img src="${source.images[index]}" alt="">`;
+      frame.querySelector("img").src = source.images[index];
       carouselNode.querySelector(".carousel-controls span").textContent = `${index + 1} / ${source.images.length}`;
+      thumbButtons.forEach((thumb) => thumb.classList.toggle("active", Number(thumb.dataset.carouselIndex) === index));
+      carouselNode.querySelector(`[data-carousel-index="${index}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
       history.replaceState(null, "", `#/artwork/${source.id}?index=${index}`);
     };
     buttons.forEach((button) => {
@@ -374,6 +390,12 @@ const wireCarousel = () => {
         index += button.dataset.carousel === "next" ? 1 : -1;
         if (index < 0) index = source.images.length - 1;
         if (index >= source.images.length) index = 0;
+        draw();
+      });
+    });
+    thumbButtons.forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        index = Number(thumb.dataset.carouselIndex) || 0;
         draw();
       });
     });
