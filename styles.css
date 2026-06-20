@@ -27,6 +27,16 @@ body {
   letter-spacing: 0;
 }
 
+body.route-home {
+  overflow: hidden;
+}
+
+body.route-home .view {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -111,7 +121,6 @@ p {
   display: grid;
   gap: clamp(1.12rem, 2.2vh, 1.78rem);
   margin-top: clamp(64px, 11vh, 116px);
-  counter-reset: nav;
 }
 
 .menu a {
@@ -124,12 +133,8 @@ p {
 }
 
 .menu a::before {
-  counter-increment: nav;
-  content: "0" counter(nav);
-  display: block;
-  margin-bottom: 0.2rem;
-  color: var(--muted);
-  font-size: 0.66rem;
+  display: none;
+  content: none;
 }
 
 .menu a::after {
@@ -239,9 +244,11 @@ p {
 }
 
 .home {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(210px, 0.7fr) minmax(0, 1.5fr);
+  grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.42fr);
   gap: clamp(28px, 4vw, 72px);
   align-items: end;
   padding: 24px var(--page-pad) 30px;
@@ -249,6 +256,7 @@ p {
 
 .home-copy {
   align-self: stretch;
+  min-width: 0;
   display: grid;
   align-content: space-between;
   padding-top: 0.1rem;
@@ -261,7 +269,7 @@ p {
   margin-top: clamp(56px, 9vh, 112px);
   margin-left: clamp(12px, 1.8vw, 28px);
   color: var(--ink);
-  font-size: clamp(2.3rem, 6.15vw, 6.85rem);
+  font-size: clamp(2.3rem, 5.35vw, 5.85rem);
   line-height: 0.92;
 }
 
@@ -288,15 +296,16 @@ p {
 
 .home-frame {
   align-self: stretch;
-  min-height: calc(100vh - 54px);
+  min-height: 0;
   display: grid;
   place-items: center;
   padding-left: clamp(8px, 1.6vw, 28px);
+  overflow: hidden;
 }
 
 .home-frame img {
   width: 100%;
-  height: calc(100vh - 70px);
+  height: calc(100vh - 72px);
   object-fit: contain;
 }
 
@@ -315,7 +324,7 @@ p {
 .bio-photo {
   grid-column: 2;
   grid-row: 1;
-  width: min(100%, 360px);
+  width: min(100%, 280px);
   margin: 0;
   object-fit: cover;
 }
@@ -368,7 +377,6 @@ p {
   color: #fff;
 }
 
-.row-number,
 .row-count,
 .row-en {
   color: var(--muted);
@@ -403,15 +411,6 @@ p {
   filter: grayscale(0%);
 }
 
-.artwork-card .row-number {
-  position: absolute;
-  top: 0.7rem;
-  left: 0.75rem;
-  z-index: 1;
-  color: var(--ink);
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.65);
-}
-
 .tile-caption {
   display: grid;
   gap: 0.35rem;
@@ -424,6 +423,24 @@ p {
 
 .detail-head a {
   color: var(--muted);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: clamp(22px, 4vh, 42px);
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.2;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.back-link::before {
+  content: "< ";
+}
+
+.back-link:hover {
+  color: var(--ink);
+  transform: translateX(-2px);
 }
 
 .group-meta {
@@ -719,8 +736,8 @@ p {
   }
 
   .menu a::before {
-    margin-bottom: 0.36rem;
-    font-size: 0.72rem;
+    display: none;
+    content: none;
   }
 
   .menu a::after {
@@ -728,10 +745,12 @@ p {
   }
 
   .home {
-    min-height: calc(100vh - 62px);
+    height: calc(100vh - 62px);
+    min-height: 0;
     grid-template-columns: 1fr;
     align-items: start;
-    padding: 18px 16px 24px;
+    overflow: hidden;
+    padding: 18px 16px 20px;
   }
 
   .home-copy {
@@ -758,7 +777,7 @@ p {
 
   .home-frame img {
     height: auto;
-    max-height: 58vh;
+    max-height: 52vh;
   }
 
   .page,
@@ -788,7 +807,7 @@ p {
   }
 
   .bio-photo {
-    width: min(100%, 320px);
+    width: min(100%, 240px);
   }
 
   .artwork-index {
@@ -843,5 +862,12 @@ p {
 
   .video-grid {
     grid-template-columns: 1fr;
+  }
+
+  body.route-home .main-container,
+  body.route-home .view {
+    height: calc(100vh - 62px);
+    min-height: 0;
+    overflow: hidden;
   }
 }
