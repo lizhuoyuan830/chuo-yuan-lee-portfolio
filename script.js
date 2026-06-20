@@ -209,12 +209,6 @@ const carousel = (images, index = 0) => {
     <div class="carousel carousel-shift-${safeIndex % 3}" data-index="${safeIndex}">
       <figure class="carousel-frame carousel-shift-${safeIndex % 3}">
         <img src="${currentImage}" alt="">
-        <button class="carousel-hotspot carousel-hotspot-prev" type="button" data-carousel="prev" aria-label="${labels[language].previous}">
-          <span aria-hidden="true">&larr;</span>
-        </button>
-        <button class="carousel-hotspot carousel-hotspot-next" type="button" data-carousel="next" aria-label="${labels[language].next}">
-          <span aria-hidden="true">&rarr;</span>
-        </button>
       </figure>
       <div class="carousel-footer">
         <div class="carousel-thumbs" aria-label="${labels[language].artworks}">
@@ -380,24 +374,11 @@ const wireCarousel = () => {
 
     let index = Number(carouselNode.dataset.index) || 0;
     const imageNode = frame.querySelector("img");
-    const footer = carouselNode.querySelector(".carousel-footer");
-    const syncFooter = () => {
-      const frameRect = frame.getBoundingClientRect();
-      const imageRect = imageNode.getBoundingClientRect();
-      if (!imageRect.width) return;
-      footer.style.width = `${imageRect.width}px`;
-      footer.style.marginLeft = `${Math.max(0, imageRect.left - frameRect.left)}px`;
-      footer.style.marginRight = "auto";
-    };
     const syncOrientation = () => {
       carouselNode.classList.toggle("is-portrait", imageNode.naturalHeight > imageNode.naturalWidth);
-      requestAnimationFrame(syncFooter);
     };
     imageNode.addEventListener("load", syncOrientation);
     if (imageNode.complete) syncOrientation();
-    const imageResizeObserver = new ResizeObserver(syncFooter);
-    imageResizeObserver.observe(imageNode);
-    window.addEventListener("resize", syncFooter);
     const draw = () => {
       carouselNode.className = `carousel carousel-shift-${index % 3}`;
       frame.className = `carousel-frame carousel-shift-${index % 3}`;
